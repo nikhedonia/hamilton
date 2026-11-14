@@ -10,15 +10,55 @@ Built with **React + TypeScript + WebGL2**. Numerical integration runs in a
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5173/
 npm test           # unit tests for the parser, derivatives and integrator
-npm run build      # type-check + production bundle
-npm run preview    # serve the production build
+npm run build      # type-check + production bundle (base /hamilton/)
+npm run preview    # serve the production build at /hamilton/
 ```
 
 WebGL2 is required. A dedicated or integrated GPU is recommended; the renderer
 uses instanced-free, single-buffer line drawing and point sprites, so it also
 works on modest hardware.
+
+## Deployment
+
+The production site is built for:
+
+```text
+https://nikhedonia.net/hamilton/
+```
+
+`.github/workflows/deploy.yml` runs on every push to `main` or `master` (and
+manually via **Run workflow**):
+
+1. installs with `npm ci`,
+2. runs the linter,
+3. runs the test suite,
+4. builds the production bundle (Vite base `/hamilton/`),
+5. uploads `dist/` as a GitHub Pages artifact,
+6. deploys through the `github-pages` environment.
+
+To enable it in the repository, open **Settings → Pages** and set the source to
+**GitHub Actions**.
+
+The `/hamilton/` path assumes that `nikhedonia.net` is configured as the custom
+domain on the **user/organization Pages site** (`nikhedonia.github.io`). Project
+sites inherit the custom domain and are served under `/<repository>/`. This
+repository therefore does **not** include a `CNAME` file: adding one to a project
+site would make GitHub Pages serve that project at the domain root instead of
+`/hamilton/`. The DNS for the apex domain belongs to the user-site repository.
+
+The project is built with Vite base `/hamilton/`; the dev server stays at `/`.
+The base matches the repository name. If the repository is renamed, update
+`base` in `vite.config.ts` and the examples in this section. Until the custom
+domain is live, the same deployment is available at
+`https://<account>.github.io/hamilton/`.
+
+A local production preview is available at the URL Vite prints, normally:
+
+```text
+http://localhost:4173/hamilton/
+```
 
 ## What it does
 
@@ -201,6 +241,12 @@ src/
     useDebouncedValue.ts
   App.tsx          controls, presets, parameter editing, HUD
 tests/             vitest unit tests, including every built-in preset
+.github/
+  workflows/
+    deploy.yml     GitHub Pages build + deploy workflow
+public/
+  .nojekyll        keep GitHub Pages from running Jekyll
+  favicon.svg
 ```
 
 ## Worker protocol (summary)
